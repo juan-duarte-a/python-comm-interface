@@ -1,2 +1,2 @@
 # python-comm-interface
-Python communication interface to exchange data to other apps using TCP sockets.
+Python communication interface to exchange data with other apps using TCP sockets.
