@@ -4,6 +4,10 @@ import time
 
 class Actions:
     END = bytearray(bytes([27, 27, 27]))
+    RUN = bytearray(bytes([48, 48, 48]))
+    STOP = bytearray(bytes([49, 49, 49]))
+    TURN_LEFT = bytearray(bytes([50, 50, 50]))
+    TURN_RIGHT = bytearray(bytes([51, 51, 51]))
 
 
 class CommInterface:
@@ -21,14 +25,14 @@ class CommInterface:
         server_address: tuple = ('localhost', self.port)
 
         while True:
-            if self.connect_request_completed(server_address):
+            if self._connect_request_completed(server_address):
                 break
             print("Awaiting connection with server...")
             time.sleep(1.0)
 
         self.connected = True
 
-    def connect_request_completed(self, address: tuple) -> bool:
+    def _connect_request_completed(self, address: tuple) -> bool:
         try:
             self.sock.connect(address)
             return True
