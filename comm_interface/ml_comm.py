@@ -54,10 +54,20 @@ class CommInterface:
     def send_action(self, action) -> list:
         result: list = []
         data_received: bytes
+        _message: str
+
+        if action == Actions.RUN:
+            _message = "RUN"
+        elif action == Actions.STOP:
+            _message = "STOP"
+        elif action == Actions.TURN_LEFT:
+            _message = "TURN_LEFT"
+        elif action == Actions.TURN_RIGHT:
+            _message = "TURN_RIGHT"
 
         try:
             self.sock.send(action)
-            print("Sent:", action.decode())
+            print("Sent:", action.decode(), _message)
 
             data_received = bytes()
             while action != Actions.END and len(data_received) == 0:
