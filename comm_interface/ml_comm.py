@@ -54,7 +54,7 @@ class CommInterface:
     def send_action(self, action) -> list:
         result: list = []
         data_received: bytes
-        _message: str
+        _message: str = ""
 
         if action == Actions.RUN:
             _message = "RUN"

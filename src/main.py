@@ -66,7 +66,7 @@ while True:
     comm.send_action(Actions.TURN_LEFT)
     time.sleep(0.483)
     comm.send_action(Actions.TURN_LEFT)
-    time.sleep(1.037)
+    time.sleep(1.067)
     comm.send_action(Actions.TURN_RIGHT)
     time.sleep(0.517)
     comm.send_action(Actions.TURN_RIGHT)
