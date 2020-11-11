@@ -27,7 +27,7 @@ class CommInterface:
         while True:
             if self._connect_request_completed(server_address):
                 break
-            print("Awaiting connection with server...")
+            print("Waiting connection with server...")
             time.sleep(1.0)
 
         self.connected = True
@@ -38,6 +38,11 @@ class CommInterface:
             return True
         except ConnectionRefusedError:
             return False
+
+    @staticmethod
+    def _get_distance(data: bytes) -> int:
+        distance: int = data[1] * 256 + data[2]
+        return distance
 
     def communicate_test(self, iterations: int = 1):
         data_sent: bytearray
@@ -74,6 +79,7 @@ class CommInterface:
                 data_received = self.sock.recv(3)
                 result = [0, data_received]
                 print("Received:", data_received)
+                print("Front distance:", self._get_distance(data_received))
 
         except AttributeError:
             result = self.ERROR
