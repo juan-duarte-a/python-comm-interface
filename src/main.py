@@ -1,17 +1,20 @@
 from comm_interface.ml_comm import CommInterface, Actions
 import time
 
-comm: CommInterface = CommInterface()
-comm.connect()
-
-# comm.communicate_test(10000)
+# comm: CommInterface = CommInterface(0)
+# comm.connect()
+# comm.communicate_test(50000)
 # comm.send_action(Actions.END)
 # comm.close_comm()
 # print("Finished!")
 
+comm: CommInterface = CommInterface()
+comm.connect()
+
 while True:
     time.sleep(1)
-    comm.send_action(Actions.RUN)
+    for i in range(1):
+        comm.send_action(Actions.RUN)
     time.sleep(3.58333)
     comm.send_action(Actions.TURN_RIGHT)
     time.sleep(0.43333)
