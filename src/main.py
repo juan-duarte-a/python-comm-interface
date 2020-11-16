@@ -1,3 +1,5 @@
+import sys
+sys.path.append('../python-comm-interface')
 from comm_interface.ml_comm import CommInterface, Actions
 import time
 
