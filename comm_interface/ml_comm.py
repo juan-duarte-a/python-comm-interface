@@ -40,6 +40,8 @@ class CommInterface:
 
     CENTER_DISTANCE = bytearray(bytes([82, 67, 68]))
     IS_ORIENTED = bytearray(bytes([82, 73, 79]))
+    BYTE_TRUE: int = 84
+    BYTE_FALSE: int = 70
 
     sock: socket
     port: int
@@ -81,9 +83,8 @@ class CommInterface:
         except ConnectionRefusedError:
             return False
 
-    @staticmethod
-    def _get_bool(data: bytes) -> bool:
-        return True if data[2] == 84 else False
+    def _get_bool(self, data: bytes) -> bool:
+        return True if data[2] == self.BYTE_TRUE else False
 
     @staticmethod
     def _get_int(data: bytes) -> int:
