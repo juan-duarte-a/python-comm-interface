@@ -77,6 +77,7 @@ class CommInterface:
             time.sleep(1.0)
 
         self.connected = True
+        print("Conexión establecida.")
 
     def _connect_request_completed(self, address: tuple) -> bool:
         try:
