@@ -48,12 +48,14 @@ class CommInterface:
     connected: bool
     start_timestamp: float
     server_latency: float
+    verbose: bool
 
-    def __init__(self, latency: float = 0.005):
+    def __init__(self, latency: float = 0.005, verbose_option: bool = False):
         self.port = 11435
         self.connected = False
         self.start_timestamp = time.time()
         self.server_latency = latency
+        self.verbose = verbose_option
 
     def connect(self, port_number: int = 11435) -> None:
         """
@@ -120,7 +122,8 @@ class CommInterface:
             data_sent = bytearray(bytes([65, 66, 67]))
             # data_sent.clear() # bytearray must be empty before sending it.
             # data_sent.extend(map(ord, data_string)) # str to bytearray.
-            print("Iteration:", i)
+            if self.verbose:
+                print("Iteration:", i)
             self.send_action(data_sent)
 
     def distance_from_center(self) -> list:
@@ -181,7 +184,8 @@ class CommInterface:
         wait_time: float = time.time() - self.start_timestamp
 
         if wait_time < self.server_latency:
-            print("Server busy - Err:", Errors.BUSY, "\nTrying again...")
+            if self.verbose:
+                print("Server busy - Err:", Errors.BUSY, "\nTrying again...")
             time.sleep(self.server_latency - wait_time)
             # return Errors.get_error(Errors.BUSY)
         else:
@@ -202,7 +206,8 @@ class CommInterface:
 
         try:
             bytes_sent = self.sock.send(action)
-            print("Sent:", action.decode(), _message, "- bytes:", bytes_sent)
+            if self.verbose:
+                print("Sent:", action.decode(), _message, "- bytes:", bytes_sent)
 
             data_received = bytes()
             while action != Actions.END and len(data_received) == 0:
@@ -210,7 +215,8 @@ class CommInterface:
                 if len(data_received) == 0:
                     time.sleep(self.server_latency)
             result = [0, data_received]
-            print("Received:", data_received)
+            if self.verbose:
+                print("Received:", data_received)
         except AttributeError:
             result = Errors.get_error(Errors.CONNECTION_ERROR)
         finally:
