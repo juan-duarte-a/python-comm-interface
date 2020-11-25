@@ -38,50 +38,90 @@ class CommInterface:
     Controlador de comunicación entre Python y ML Racing.
     """
 
+    CONNECTION_OK = bytearray(bytes([67, 79, 75]))
     CENTER_DISTANCE = bytearray(bytes([82, 67, 68]))
     IS_ORIENTED = bytearray(bytes([82, 73, 79]))
     BYTE_TRUE: int = 84
     BYTE_FALSE: int = 70
 
-    sock: socket
-    port: int
+    output_socket: socket
+    input_socket: socket
+    output_port: int
+    input_port: int
+    client_address_receive: tuple
     connected: bool
     start_timestamp: float
     server_latency: float
     verbose: bool
 
     def __init__(self, latency: float = 0.005, verbose_option: bool = False):
-        self.port = 11435
+        self.output_port = 11435
         self.connected = False
         self.start_timestamp = time.time()
         self.server_latency = latency
         self.verbose = verbose_option
 
-    def connect(self, port_number: int = 11435) -> None:
+    def connect(self, output_port_number: int = 11435, input_port_number: int = 11436) -> None:
         """
         Establece la conexión entre Python y ML Racing.
 
-        :param port_number:
-            Número del puerto en 'localhost' a conectarse.
+        :param output_port_number:
+            Número del puerto en 'localhost' para conexión de salida a ML Racing.
             Valor por defecto: 11435.
+        :param input_port_number:
+            Número del puerto en 'localhost' para conexión de entrada de ML Racing.
+            Valor por defecto: 11436.
         """
 
-        self.port = port_number
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        server_address: tuple = ('localhost', self.port)
+        connection_check: list
+
+        self.output_port = output_port_number
+        self.output_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server_address_send: tuple = ('localhost', self.output_port)
+
+        self.input_port = input_port_number
+        self.input_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server_address_receive: tuple = ('localhost', self.input_port)
 
         while True:
-            if self._connect_request_completed(server_address):
+            if self._connect_request_completed(server_address_send):
                 break
-            print("Esperando conexión con ML Racing...")
+            print("Esperando conexión de salida con ML Racing...")
             time.sleep(1.0)
 
-        self.connected = True
-        print("Conexión establecida.")
+        connection_check = self.send_action(self.CONNECTION_OK)
+        if connection_check[0] == Errors.OK:
+            print("Conexión de salida establecida.")
+        elif connection_check[0] == Errors.CONNECTION_ERROR:
+            print("¡Error estableciendo conexión de salida!")
+            return
+
+        self.input_socket.bind(server_address_receive)
+        self.input_socket.listen()
+
+        while True:
+            if self._connection_wait_completed():
+                break
+            print("Esperando conexión de entrada con ML Racing...")
+            time.sleep(1.0)
+
+        if len(self.client_address_receive) > 0:
+            self.connected = True
+            print("Conexión de entrada establecida.")
+            print("Conexión con ML Racing completada.")
+        else:
+            print("¡Error estableciendo conexión de entrada!")
 
     def _connect_request_completed(self, address: tuple) -> bool:
         try:
-            self.sock.connect(address)
+            self.output_socket.connect(address)
+            return True
+        except ConnectionRefusedError:
+            return False
+
+    def _connection_wait_completed(self) -> bool:
+        try:
+            self.client_address_receive = self.input_socket.accept()
             return True
         except ConnectionRefusedError:
             return False
@@ -124,7 +164,7 @@ class CommInterface:
             # data_sent.clear() # bytearray must be empty before sending it.
             # data_sent.extend(map(ord, data_string)) # str to bytearray.
             if self.verbose:
-                print("Iteration:", i)
+                print("Iteración:", i)
             self.send_action(data_sent)
 
     def distance_from_center(self) -> list:
@@ -168,7 +208,7 @@ class CommInterface:
         else:
             return Errors.get_error(Errors.DEFAULT_ERROR)
 
-    def send_action(self, action) -> list:
+    def send_action(self, action: bytearray) -> list:
         """
         Envía una acción al vehículo.
 
@@ -184,9 +224,9 @@ class CommInterface:
         bytes_sent: int
         wait_time: float = time.time() - self.start_timestamp
 
-        if wait_time < self.server_latency:
+        if wait_time < self.server_latency and self.connected:
             if self.verbose:
-                print("Server busy - Err:", Errors.BUSY, "\nTrying again...")
+                print("Servidor de salida ocupado. - Err:", Errors.BUSY, "\nIntentando de nuevo...")
             time.sleep(self.server_latency - wait_time)
             # return Errors.get_error(Errors.BUSY)
         else:
@@ -206,18 +246,18 @@ class CommInterface:
             _message = "IS_ORIENTED"
 
         try:
-            bytes_sent = self.sock.send(action)
+            bytes_sent = self.output_socket.send(action)
             if self.verbose:
-                print("Sent:", action.decode(), _message, "- bytes:", bytes_sent)
+                print("Enviado ->", action.decode(), _message, "- bytes:", bytes_sent)
 
             data_received = bytes()
             while action != Actions.END and len(data_received) == 0:
-                data_received = self.sock.recv(3)
+                data_received = self.output_socket.recv(3)
                 if len(data_received) == 0:
                     time.sleep(self.server_latency)
             result = [0, data_received]
             if self.verbose:
-                print("Received:", data_received)
+                print("Recibido <-", data_received)
         except AttributeError:
             result = Errors.get_error(Errors.CONNECTION_ERROR)
         finally:
@@ -228,4 +268,4 @@ class CommInterface:
         Finaliza la conexión con ML Racing.
         """
 
-        self.sock.close()
+        self.output_socket.close()
