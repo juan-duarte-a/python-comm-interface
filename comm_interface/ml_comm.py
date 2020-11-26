@@ -1,5 +1,6 @@
 import socket
 import time
+import threading
 
 
 class Actions:
@@ -53,6 +54,9 @@ class CommInterface:
     start_timestamp: float
     server_latency: float
     verbose: bool
+    input_comm_handler: threading.Thread
+    output_data_size: int = 3
+    input_data_size: int = 10
 
     def __init__(self, latency: float = 0.005, verbose_option: bool = False):
         self.output_port = 11435
@@ -109,6 +113,11 @@ class CommInterface:
             self.connected = True
             print("Conexión de entrada establecida.")
             print("Conexión con ML Racing completada.")
+            self.input_comm_handler = threading.Thread(target=self._input_data_handler)
+            self.input_comm_handler.start()
+            time.sleep(0.5)
+            if self.verbose:
+                print("Continuando ejecución del hilo principal.")
         else:
             print("¡Error estableciendo conexión de entrada!")
 
@@ -252,10 +261,12 @@ class CommInterface:
 
             data_received = bytes()
             while action != Actions.END and len(data_received) == 0:
-                data_received = self.output_socket.recv(3)
+                data_received = self.output_socket.recv(self.output_data_size)
                 if len(data_received) == 0:
                     time.sleep(self.server_latency)
+
             result = [0, data_received]
+
             if self.verbose:
                 print("Recibido <-", data_received)
         except AttributeError:
@@ -263,9 +274,26 @@ class CommInterface:
         finally:
             return result
 
+    def _input_data_handler(self) -> None:
+        data_received: bytes
+        conn = self.client_address_receive[0]
+        time.sleep(0.5)
+        data_received = conn.recv(self.input_data_size)
+        if self.verbose:
+            print("Transmisión de datos de conexión de entrada <-", data_received.decode())
+
+        while self.connected:
+            data_received = bytes()
+            while len(data_received) == 0:
+                data_received = conn.recv(self.input_data_size)
+                time.sleep(self.server_latency * 10)
+            if self.verbose:
+                print("Recibido de conexión de entrada <-", data_received.decode())
+
     def close_comm(self) -> None:
         """
         Finaliza la conexión con ML Racing.
         """
 
         self.output_socket.close()
+        self.connected = False
