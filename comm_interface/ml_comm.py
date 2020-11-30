@@ -104,10 +104,11 @@ class CommInterface:
         print("Iniciando transmisión de datos por conexión de salida.")
         connection_check = self.send_action(self.CONNECTION_OK)
         if connection_check is not None and connection_check[0] == Errors.OK:
-            print("Conexión de salida establecida.")
+            print("Respuesta recibida en conexión de salida.")
         elif connection_check is not None and connection_check[0] == Errors.CONNECTION_ERROR:
             print("¡Error estableciendo conexión de salida!")
             return
+        print("Conexión de salida establecida.")
 
         self.input_socket.bind(server_address_receive)
         self.input_socket.listen()

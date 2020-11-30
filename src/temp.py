@@ -20,21 +20,21 @@ class MLRacingKeyRegister:
         elif key == Key.up:
             if self.time_start == 0:
                 self.time_start = time.time()
-            print(f"time.sleep({time.time() - self.time_start})")
+            print(f"time.sleep({time.time() - self.time_start} * time_factor)")
             print("comm.send_action(Actions.RUN)")
             self.comm.send_action(Actions.RUN)
         elif key == Key.down:
-            print(f"time.sleep({time.time() - self.time_start})")
+            print(f"time.sleep({time.time() - self.time_start} * time_factor)")
             print("comm.send_action(Actions.STOP)")
             self.time_start = time.time()
             self.comm.send_action(Actions.STOP)
         elif key == Key.left:
-            print(f"time.sleep({time.time() - self.time_start})")
+            print(f"time.sleep({time.time() - self.time_start} * time_factor)")
             print("comm.send_action(Actions.TURN_LEFT)")
             self.time_start = time.time()
             self.comm.send_action(Actions.TURN_LEFT)
         elif key == Key.right:
-            print(f"time.sleep({time.time() - self.time_start})")
+            print(f"time.sleep({time.time() - self.time_start} * time_factor)")
             print("comm.send_action(Actions.TURN_RIGHT)")
             self.time_start = time.time()
             self.comm.send_action(Actions.TURN_RIGHT)
