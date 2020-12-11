@@ -1,6 +1,6 @@
 import socket
-import time
 import threading
+import time
 
 
 class Actions:
@@ -11,8 +11,11 @@ class Actions:
     END = bytearray(bytes([65, 27, 4]))
     RUN = bytearray(bytes([65, 82, 78]))
     STOP = bytearray(bytes([65, 83, 84]))
+    GEAR_UP = bytearray(bytes([65, 71, 85]))
+    GEAR_DOWN = bytearray(bytes([65, 71, 68]))
     TURN_LEFT = bytearray(bytes([65, 84, 76]))
     TURN_RIGHT = bytearray(bytes([65, 84, 82]))
+    CENTER_WHEEL = bytearray(bytes([65, 67, 87]))
 
 
 class Errors:
