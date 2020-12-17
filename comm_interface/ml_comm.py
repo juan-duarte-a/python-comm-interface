@@ -39,7 +39,7 @@ class Errors:
 
 class CommInterface:
     """
-    Controlador de comunicación entre Python y ML Racing.
+    Controlador de comunicación entre Python y ML-Racing.
     """
 
     CONNECTION_OK = bytearray(bytes([67, 79, 75]))
@@ -71,20 +71,28 @@ class CommInterface:
         self.verbose = verbose_option
         self.state_parameters = {
             "is_oriented": True,
-            "distance_from_center": 0,
+            "tires_off_road": 0,
             "front_distance": 0,
-            "track_completion": 0.0
+            "left_distance": 0,
+            "right_distance": 0,
+            "left_30deg_distance": 0,
+            "right_30deg_distance": 0,
+            "left_60deg_distance": 0,
+            "right_60deg_distance": 0,
+            "percentage_from_center": 0.0,
+            "track_completion": 0.0,
+            "done": False
         }
 
     def connect(self, output_port_number: int = 11435, input_port_number: int = 11436) -> None:
         """
-        Establece la conexión entre Python y ML Racing.
+        Establece la conexión entre Python y ML-Racing.
 
         :param output_port_number:
-            Número del puerto en 'localhost' para conexión de salida a ML Racing.
+            Número del puerto en 'localhost' para conexión de salida a ML-Racing.
             Valor por defecto: 11435.
         :param input_port_number:
-            Número del puerto en 'localhost' para conexión de entrada de ML Racing.
+            Número del puerto en 'localhost' para conexión de entrada de ML-Racing.
             Valor por defecto: 11436.
         """
 
@@ -101,7 +109,7 @@ class CommInterface:
         while True:
             if self._connect_request_completed(server_address_send):
                 break
-            print("Esperando conexión de salida con ML Racing...")
+            print("Esperando conexión de salida con ML-Racing...")
             time.sleep(1.0)
 
         print("Iniciando transmisión de datos por conexión de salida.")
@@ -119,12 +127,12 @@ class CommInterface:
         while True:
             if self._connection_wait_completed():
                 break
-            print("Esperando conexión de entrada con ML Racing...")
+            print("Esperando conexión de entrada con ML-Racing...")
             time.sleep(1.0)
 
         if len(self.client_address_receive) > 0:
             print("Conexión de entrada establecida.")
-            print("Conexión con ML Racing completada.")
+            print("Conexión con ML-Racing completada.")
             self.connected = True
             self.input_comm_handler = threading.Thread(target=self._input_data_handler)
             self.input_comm_handler.start()
@@ -212,7 +220,7 @@ class CommInterface:
 
     def close_comm(self) -> None:
         """
-        Finaliza la conexión con ML Racing.
+        Finaliza la conexión con ML-Racing.
         """
 
         self.output_socket.close()
@@ -260,7 +268,14 @@ class CommInterface:
             else:
                 parameters = message.split(":")
                 self.state_parameters["is_oriented"] = str(parameters[0]).lower() == "true"
-                self.state_parameters["distance_from_center"] = int(parameters[1])
-                self.state_parameters["front_distance"] = int(parameters[2])
-                self.state_parameters["track_completion"] = float(parameters[3])
+                self.state_parameters["tires_off_road"] = int(parameters[1])
+                self.state_parameters["front_distance"] = float(parameters[2]) / 100
+                self.state_parameters["left_distance"] = float(parameters[3]) / 100
+                self.state_parameters["right_distance"] = float(parameters[4]) / 100
+                self.state_parameters["left_30deg_distance"] = float(parameters[5]) / 100
+                self.state_parameters["right_30deg_distance"] = float(parameters[6]) / 100
+                self.state_parameters["left_60deg_distance"] = float(parameters[7]) / 100
+                self.state_parameters["right_60deg_distance"] = float(parameters[8]) / 100
+                self.state_parameters["percentage_from_center"] = float(parameters[9]) / 10
+                self.state_parameters["track_completion"] = float(parameters[10])
             time.sleep(self.server_latency * 2)
