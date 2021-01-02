@@ -59,7 +59,7 @@ class CommInterface:
     verbose: bool
     input_comm_handler: threading.Thread
     OUTPUT_DATA_SIZE: int = 3
-    INPUT_DATA_SIZE: int = 50
+    INPUT_DATA_SIZE: int = 65
     state_parameters: dict
 
     def __init__(self, latency: float = 0.005, verbose_option: bool = False):
@@ -187,10 +187,16 @@ class CommInterface:
             _message = "RUN"
         elif action == Actions.STOP:
             _message = "STOP"
+        elif action == Actions.GEAR_UP:
+            _message = "GEAR_UP"
+        elif action == Actions.GEAR_DOWN:
+            _message = "GEAR_DOWN"
         elif action == Actions.TURN_LEFT:
             _message = "TURN_LEFT"
         elif action == Actions.TURN_RIGHT:
             _message = "TURN_RIGHT"
+        elif action == Actions.CENTER_WHEEL:
+            _message = "CENTER_WHEEL"
         elif action == self.CENTER_DISTANCE:
             _message = "CENTER_DISTANCE"
         elif action == self.IS_ORIENTED:
@@ -278,4 +284,5 @@ class CommInterface:
                 self.state_parameters["right_60deg_distance"] = float(parameters[8]) / 100
                 self.state_parameters["percentage_from_center"] = float(parameters[9]) / 10
                 self.state_parameters["track_completion"] = float(parameters[10])
+                self.state_parameters["done"] = str(parameters[11]).lower() == "true"
             time.sleep(self.server_latency * 2)
