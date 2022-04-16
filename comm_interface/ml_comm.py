@@ -114,7 +114,7 @@ class CommInterface:
 
         print("Iniciando transmisión de datos por conexión de salida.")
         connection_check = self.send_action(self.CONNECTION_OK)
-        if connection_check is not None and connection_check[0] == Errors.OK:
+        if connection_check is None or (connection_check is not None and connection_check[0] == Errors.OK):
             print("Respuesta recibida en conexión de salida.")
         elif connection_check is not None and connection_check[0] == Errors.CONNECTION_ERROR:
             print("¡Error estableciendo conexión de salida!")
@@ -131,14 +131,14 @@ class CommInterface:
             time.sleep(1.0)
 
         if len(self.client_address_receive) > 0:
+            if self.verbose:
+                print("Parámetros de conexión:", self.client_address_receive)
             print("Conexión de entrada establecida.")
-            print("Conexión con ML-Racing completada.")
-            self.connected = True
             self.input_comm_handler = threading.Thread(target=self._input_data_handler)
             self.input_comm_handler.start()
             time.sleep(0.6)
             if self.verbose:
-                print("Continuando ejecución del hilo principal.")
+                print("Continuando ejecución del hilo principal.\n")
         else:
             print("¡Error estableciendo conexión de entrada!")
 
@@ -259,8 +259,13 @@ class CommInterface:
         while len(data_received) == 0:
             data_received = conn.recv(self.INPUT_DATA_SIZE)
 
+        print("Sincronizando conexión...")
+        self.send_action(self.CONNECTION_OK)
+        print("Conexión con ML-Racing completada.")
+        self.connected = True
+
         if self.verbose:
-            print("Transmisión de datos de conexión de entrada <-", data_received.decode())
+            print("Transmisión inicial de datos de conexión de entrada <-", data_received.decode())
 
         while self.connected:
             data_received = bytes()

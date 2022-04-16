@@ -8,7 +8,7 @@ import time
 # comm.close_comm()
 # print("Finished!")
 
-time_factor: float = 1 / 3.0
+time_factor: float = 1 / 3 + 0.0
 turning_mode: int = 1
 
 comm: CommInterface = CommInterface(latency=0.005*time_factor, verbose_option=True)
@@ -117,6 +117,7 @@ if turning_mode == 0:
 elif turning_mode == 1:
     while True:
         while True:
+            print(comm.state_parameters)    # Revisión de estado inicial.
             time.sleep(1)
             comm.send_action(Actions.GEAR_UP)
             print(comm.state_parameters)
