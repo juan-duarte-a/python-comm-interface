@@ -84,7 +84,7 @@ class CommInterface:
             "done": False
         }
 
-    def connect(self, output_port_number: int = 11435, input_port_number: int = 11436) -> None:
+    def connect(self, output_port_number: int = 11435, input_port_number: int = 11436, test: bool = False) -> None:
         """
         Establece la conexión entre Python y ML-Racing.
 
@@ -94,6 +94,9 @@ class CommInterface:
         :param input_port_number:
             Número del puerto en 'localhost' para conexión de entrada de ML-Racing.
             Valor por defecto: 11436.
+        :param test:
+            Asignar 'True' para ejecutar en modo de prueba.
+            Valor por defecto: False.
         """
 
         connection_check: list
@@ -134,11 +137,15 @@ class CommInterface:
             if self.verbose:
                 print("Parámetros de conexión:", self.client_address_receive)
             print("Conexión de entrada establecida.")
-            self.input_comm_handler = threading.Thread(target=self._input_data_handler)
-            self.input_comm_handler.start()
-            time.sleep(0.6)
-            if self.verbose:
-                print("Continuando ejecución del hilo principal.\n")
+
+            if test:
+                self.send_action(self.CONNECTION_OK)
+            else:
+                self.input_comm_handler = threading.Thread(target=self._input_data_handler)
+                self.input_comm_handler.start()
+                time.sleep(0.6)
+                if self.verbose:
+                    print("Continuando ejecución del hilo principal.\n")
         else:
             print("¡Error estableciendo conexión de entrada!")
 
