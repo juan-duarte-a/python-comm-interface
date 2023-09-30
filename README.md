@@ -1,2 +1,2 @@
-# python-comm-interface
-Python communication interface to exchange data with other apps using TCP sockets.
+# python-comm-interface ML-Racing
+Python communication interface to exchange data ML-Racing project (https://github.com/juan-duarte-a/ml-racing.git) using TCP sockets.
